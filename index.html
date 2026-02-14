@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScoutMe - اكتشف المواهب الرياضية</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Registration Overlay (Pi Network Authentication) -->
+    <div id="reg-overlay" class="reg-overlay">
+        <div class="reg-content">
+            <img src="image/logo.png" alt="ScoutMe Logo" class="reg-logo">
+            <h1 data-i18n="welcome_to_scoutme">مرحبا بك في ScoutMe</h1>
+            <p data-i18n="pi_network_login_desc">سجل الدخول باستخدام Pi Network للوصول إلى المنصة</p>
+            <button class="btn-pi-signin" onclick="piSignIn()">
+                <span class="pi-icon">π</span>
+                <span data-i18n="signin_with_pi">تسجيل الدخول عبر Pi Network</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Language Selector -->
+    <div class="language-selector">
+        <select id="languageSelect">
+            <option value="ar">العربية</option>
+            <option value="en">English</option>
+            <option value="fr">Français</option>
+            <option value="es">Español</option>
+            <option value="de">Deutsch</option>
+            <option value="pt">Português</option>
+            <option value="it">Italiano</option>
+            <option value="ru">Русский</option>
+            <option value="zh">中文</option>
+            <option value="ja">日本語</option>
+            <option value="ko">한국어</option>
+            <option value="tr">Türkçe</option>
+            <option value="hi">हिन्दी</option>
+            <option value="bn">বাংলা</option>
+            <option value="ur">اردو</option>
+        </select>
+    </div>
+
+    <!-- Header -->
+    <header class="app-header">
+        <div class="logo">
+            <img src="image/logo.png" alt="ScoutMe" class="logo-image">
+            <span class="logo-text" data-i18n="appName">ScoutMe</span>
+        </div>
+        <div class="header-actions">
+            <button class="wallet-btn" onclick="openWalletModal()">
+                <span class="wallet-icon">π</span>
+                <span class="wallet-balance" id="walletBalance">0 Pi</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <!-- Home Page -->
+        <section id="homePage" class="page active">
+            <!-- Banner -->
+            <div class="banner">
+                <div class="banner-content">
+                    <h1 data-i18n="bannerTitle">اكتشف نجوم المستقبل</h1>
+                    <p data-i18n="bannerSubtitle">منصة عالمية للمواهب الرياضية</p>
+                </div>
+            </div>
+
+            <!-- Spotlight Talents -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 data-i18n="spotlightTalents">مواهب مميزة</h2>
+                    <a href="#" class="view-all" data-i18n="viewAll">عرض الكل</a>
+                </div>
+                <div class="horizontal-scroll" id="spotlightContainer">
+                    <!-- Dynamic content -->
+                </div>
+            </div>
+
+            <!-- Latest News -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 data-i18n="latestNews">آخر الأخبار</h2>
+                </div>
+                <div class="news-list" id="newsContainer">
+                    <!-- Dynamic content -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Discover Page -->
+        <section id="discoverPage" class="page">
+            <div class="search-section">
+                <div class="search-bar">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchInput" data-i18n-placeholder="searchPlaceholder" placeholder="البحث عن اللاعبين...">
+                </div>
+                <div class="filters" id="sportsFilters">
+                    <!-- Dynamic sports filters -->
+                </div>
+            </div>
+            <div class="grid-view" id="discoverGrid">
+                <!-- Dynamic content -->
+            </div>
+        </section>
+
+        <!-- Talents Page -->
+        <section id="talentsPage" class="page">
+            <div class="page-header">
+                <h1 data-i18n="talentsTitle">المواهب الرياضية</h1>
+                <div class="sort-controls">
+                    <select id="sortSelect">
+                        <option value="rating" data-i18n="sortByRating">الأعلى تقييماً</option>
+                        <option value="age" data-i18n="sortByAge">حسب العمر</option>
+                        <option value="country" data-i18n="sortByCountry">حسب الدولة</option>
+                    </select>
+                </div>
+            </div>
+            <div class="talents-list" id="talentsList">
+                <!-- Dynamic content -->
+            </div>
+        </section>
+
+        <!-- Clubs Page -->
+        <section id="clubsPage" class="page">
+            <div class="page-header">
+                <h1 data-i18n="clubsTitle">الأندية والأكاديميات</h1>
+            </div>
+            <div class="clubs-list" id="clubsList">
+                <!-- Dynamic content -->
+            </div>
+        </section>
+
+        <!-- Marketplace Page -->
+        <section id="marketplacePage" class="page">
+            <div class="page-header">
+                <h1 data-i18n="marketplace">المتجر</h1>
+            </div>
+            
+            <!-- Team Tokens -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 data-i18n="team_tokens">توكنات الفرق</h2>
+                </div>
+                <div class="horizontal-scroll" id="teamTokensContainer">
+                    <!-- Dynamic content -->
+                </div>
+            </div>
+
+            <!-- NFT Players -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 data-i18n="nft_players">NFT اللاعبين</h2>
+                </div>
+                <div class="horizontal-scroll" id="nftPlayersContainer">
+                    <!-- Dynamic content -->
+                </div>
+            </div>
+
+            <!-- Pi Ecosystem Stores -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 data-i18n="pi_stores">متاجر منظومة Pi</h2>
+                </div>
+                <p class="section-desc" data-i18n="marketplace_desc">اكتشف متاجر شريكة داخل نظام Pi</p>
+                <div class="stores-grid" id="storesContainer">
+                    <!-- Dynamic content -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Profile Page -->
+        <section id="profilePage" class="page">
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Ccircle cx='60' cy='60' r='60' fill='%231F7A1F'/%3E%3Ctext x='60' y='75' font-size='48' fill='%23FFD700' text-anchor='middle' font-family='Arial'%3EU%3C/text%3E%3C/svg%3E" alt="Profile" id="profileAvatar">
+                </div>
+                <h2 class="profile-name" id="profileName" data-i18n="userName">مستخدم ScoutMe</h2>
+                <div class="profile-wallet">
+                    <span data-i18n="wallet_address">عنوان المحفظة:</span>
+                    <span id="profileWalletAddress">--</span>
+                </div>
+                <div class="trust-score">
+                    <span class="stars">⭐⭐⭐⭐⭐</span>
+                    <span class="score">4.8</span>
+                </div>
+            </div>
+            <div class="profile-tabs">
+                <button class="tab-btn active" data-tab="overview" data-i18n="overview">نظرة عامة</button>
+                <button class="tab-btn" data-tab="stats" data-i18n="stats">الإحصائيات</button>
+                <button class="tab-btn" data-tab="nfts" data-i18n="nfts">NFTs</button>
+                <button class="tab-btn" data-tab="settings" data-i18n="settings">الإعدادات</button>
+            </div>
+            <div class="profile-content">
+                <div class="tab-content active" id="overviewTab">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">🎯</div>
+                            <div class="stat-value">156</div>
+                            <div class="stat-label" data-i18n="goals">أهداف</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">⚡</div>
+                            <div class="stat-value">89</div>
+                            <div class="stat-label" data-i18n="assists">تمريرات</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🏆</div>
+                            <div class="stat-value">12</div>
+                            <div class="stat-label" data-i18n="awards">جوائز</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-content" id="statsTab">
+                    <p data-i18n="statsComingSoon">الإحصائيات التفصيلية قريباً...</p>
+                </div>
+                <div class="tab-content" id="nftsTab">
+                    <div id="userNftsContainer">
+                        <!-- Dynamic NFTs -->
+                    </div>
+                </div>
+                <div class="tab-content" id="settingsTab">
+                    <div class="settings-list">
+                        <div class="setting-item">
+                            <span data-i18n="language">اللغة</span>
+                            <span id="currentLangDisplay">العربية</span>
+                        </div>
+                        <div class="setting-item">
+                            <span data-i18n="notifications">الإشعارات</span>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <span data-i18n="darkMode">الوضع الليلي</span>
+                            <label class="switch">
+                                <input type="checkbox">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <span data-i18n="app_commission">عمولة التطبيق (%)</span>
+                            <span>5%</span>
+                        </div>
+                        <div class="setting-item">
+                            <button class="btn-primary" onclick="linkPiWallet()" data-i18n="link_wallet">ربط محفظة Pi</button>
+                        </div>
+                    </div>
+                    <p class="dev-note" data-i18n="dev_note">ملاحظة: للدفع الحقيقي عبر Pi استعمل سيرفر/Function لحماية PI_API_KEY.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Navigation Bar -->
+    <nav class="bottom-nav">
+        <button class="nav-btn active" data-page="homePage">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-label" data-i18n="home">الرئيسية</span>
+        </button>
+        <button class="nav-btn" data-page="discoverPage">
+            <span class="nav-icon">🔍</span>
+            <span class="nav-label" data-i18n="discover">استكشف</span>
+        </button>
+        <button class="nav-btn" data-page="talentsPage">
+            <span class="nav-icon">⭐</span>
+            <span class="nav-label" data-i18n="talents">المواهب</span>
+        </button>
+        <button class="nav-btn" data-page="clubsPage">
+            <span class="nav-icon">🏆</span>
+            <span class="nav-label" data-i18n="clubs">الأندية</span>
+        </button>
+        <button class="nav-btn" data-page="marketplacePage">
+            <span class="nav-icon">🛍️</span>
+            <span class="nav-label" data-i18n="marketplace">المتجر</span>
+        </button>
+        <button class="nav-btn" data-page="profilePage">
+            <span class="nav-icon">👤</span>
+            <span class="nav-label" data-i18n="profile">الملف</span>
+        </button>
+    </nav>
+
+    <!-- Wallet Modal -->
+    <div id="walletModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeWalletModal()">&times;</span>
+            <h2 data-i18n="wallet">المحفظة</h2>
+            <div class="wallet-balance-card">
+                <div class="balance-label" data-i18n="currentBalance">الرصيد الحالي</div>
+                <div class="balance-amount" id="modalWalletBalance">0 Pi</div>
+            </div>
+            <div class="wallet-info">
+                <p><strong data-i18n="wallet_address">عنوان المحفظة:</strong></p>
+                <p id="modalWalletAddress" class="wallet-address-text">--</p>
+            </div>
+            <div class="wallet-actions">
+                <button class="wallet-action-btn" data-i18n="send">إرسال</button>
+                <button class="wallet-action-btn" data-i18n="receive">استقبال</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closePaymentModal()">&times;</span>
+            <h2 data-i18n="payment_with_pi">الدفع بـ Pi</h2>
+            <div id="paymentInfo">
+                <!-- Dynamic payment details -->
+            </div>
+            <div class="payment-amount-selector">
+                <label data-i18n="select_amount">اختر المبلغ:</label>
+                <select id="piPayAmount">
+                    <option value="0.5">0.5 Pi</option>
+                    <option value="1" selected>1 Pi</option>
+                    <option value="2">2 Pi</option>
+                </select>
+            </div>
+            <button class="btn-primary btn-full" onclick="confirmPayment()">
+                <span data-i18n="confirm_payment">تأكيد الدفع</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Pi SDK -->
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <script>
+        // Pi SDK Initialization
+        try {
+            const params = new URLSearchParams(window.location.search || '');
+            const sandboxParam = params.get('sandbox');
+            const prodParam = params.get('prod');
+
+            if (sandboxParam === '1') localStorage.setItem('PI_SANDBOX', '1');
+            if (prodParam === '1') localStorage.setItem('PI_SANDBOX', '0');
+
+            const persistedSandbox = localStorage.getItem('PI_SANDBOX') === '1';
+            const hostSandbox = String(window.location.hostname || '').toLowerCase().includes('sandbox.minepi.com');
+            const refSandbox = String(document.referrer || '').toLowerCase().includes('sandbox.minepi.com');
+            let ancestorSandbox = false;
+            try {
+                const origins = window.location.ancestorOrigins;
+                if (origins && typeof origins.length === 'number') {
+                    for (let i = 0; i < origins.length; i++) {
+                        if (String(origins[i] || '').toLowerCase().includes('sandbox.minepi.com')) {
+                            ancestorSandbox = true;
+                            break;
+                        }
+                    }
+                }
+            } catch (e) {}
+
+            let inIframe = false;
+            try { inIframe = window.self !== window.top; } catch (e) { inIframe = true; }
+
+            const useSandbox = sandboxParam === '1' || (sandboxParam !== '0' && (persistedSandbox || hostSandbox || (inIframe && (refSandbox || ancestorSandbox))));
+
+            if (window.Pi && typeof window.Pi.init === 'function') {
+                window.Pi.init({ version: "2.0", sandbox: useSandbox });
+            }
+        } catch (e) {
+            console.warn('Pi.init failed', e);
+        }
+    </script>
+    <script src="script.js"></script>
+    <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyDTA98HsQ_wlpbAAOJux4kynyg-EPQoOTM",
+    authDomain: "scoutme-73fb8.firebaseapp.com",
+    projectId: "scoutme-73fb8",
+    storageBucket: "scoutme-73fb8.firebasestorage.app",
+    messagingSenderId: "394693573994",
+    appId: "1:394693573994:web:d95d66452eb0725ef13913"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+</script>
+</body>
+</html>
