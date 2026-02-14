@@ -1,0 +1,34 @@
+{
+  "name": "scoutme",
+  "version": "2.0.0",
+  "description": "منصة عالمية للمواهب الرياضية - Global Platform for Sports Talents",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8000 || python -m SimpleHTTPServer 8000",
+    "serve": "npx http-server . -p 8000 -o",
+    "deploy:firebase": "firebase deploy",
+    "deploy:netlify": "netlify deploy --prod",
+    "deploy:vercel": "vercel --prod"
+  },
+  "keywords": [
+    "sports",
+    "talents",
+    "pi-network",
+    "firebase",
+    "scoutme",
+    "athletes"
+  ],
+  "author": "ScoutMe Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/scoutme.git"
+  },
+  "devDependencies": {
+    "firebase-tools": "^12.0.0",
+    "http-server": "^14.1.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
