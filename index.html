@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ScoutMe - منصة المواهب الرياضية العالمية</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+ integrity="sha256-sA+g9nIcoGIBrjv5wGQ9Jd1BuvsX0mK6cLxB2Ug47vY=" crossorigin=""/>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
+  integrity="sha256-o9N1j9sM7tliH9R0z9kvo2kszLZPZ+qfYV1KJX1Tk78=" crossorigin=""></script>
+  <!-- Pi Network SDK -->
+  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+  <!-- Chart.js for Analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
+</head>
+<body>
+  <!-- Pi Network Login Overlay (Initial) -->
+  <div id="piLoginOverlay" class="pi-login-overlay">
+    <div class="pi-login-card">
+      <img src="image/logo.png" alt="ScoutMe" class="pi-login-logo">
+      <h1>🏆 مرحباً بك في ScoutMe</h1>
+      <p>منصة المواهب الرياضية العالمية</p>
+      <p class="pi-subtitle">استخدم حساب Pi Network للدخول</p>
+      <button id="piSignInBtn" class="pi-signin-btn">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#FFD700"/>
+          <path d="M2 17L12 22L22 17" stroke="#FFD700" stroke-width="2"/>
+          <path d="M2 12L12 17L22 12" stroke="#FFD700" stroke-width="2"/>
+        </svg>
+        تسجيل الدخول بـ Pi Network
+      </button>
+      <div class="pi-features">
+        <div class="pi-feature-item">✨ ربط حقيقي مع محفظة Pi</div>
+        <div class="pi-feature-item">💬 نظام رسائل مدفوع بـ Pi</div>
+        <div class="pi-feature-item">🔒 آمن ومشفر بالكامل</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main App Container -->
+  <div id="appContainer" class="app-container hidden">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-content">
+        <div class="header-left">
+          <img src="image/logo.png" alt="ScoutMe" class="logo">
+          <h1 class="app-title">ScoutMe</h1>
+        </div>
+        <div class="header-right">
+          <!-- Language Selector -->
+          <select id="languageSelector" class="language-selector">
+            <option value="ar">🇸🇦 العربية</option>
+            <option value="en">🇬🇧 English</option>
+            <option value="fr">🇫🇷 Français</option>
+            <option value="es">🇪🇸 Español</option>
+            <option value="de">🇩🇪 Deutsch</option>
+            <option value="it">🇮🇹 Italiano</option>
+            <option value="pt">🇵🇹 Português</option>
+            <option value="tr">🇹🇷 Türkçe</option>
+            <option value="ru">🇷🇺 Русский</option>
+            <option value="zh">🇨🇳 中文</option>
+            <option value="ja">🇯🇵 日本語</option>
+            <option value="ko">🇰🇷 한국어</option>
+          </select>
+          <!-- Notifications Badge -->
+          <button id="notificationBtn" class="icon-btn notification-btn">
+            <span class="notification-icon">🔔</span>
+            <span id="notificationBadge" class="notification-badge hidden">0</span>
+          </button>
+          <!-- Dark Mode Toggle -->
+          <button id="darkModeToggle" class="icon-btn">🌙</button>
+          <!-- Pi Wallet Button -->
+          <button id="piWalletBtn" class="pi-wallet-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#FFD700"/>
+              <path d="M2 17L12 22L22 17" stroke="#FFD700" stroke-width="2"/>
+              <path d="M2 12L12 17L22 12" stroke="#FFD700" stroke-width="2"/>
+            </svg>
+            <span id="piWalletAmount">0.00 π</span>
+          </button>
+          <!-- User Profile Menu -->
+          <div class="user-menu">
+            <img id="userAvatar" src="image/avatar-placeholder.png" alt="User" class="user-avatar">
+            <span id="userName" class="user-name">مستخدم</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Notification Panel (Sliding) -->
+    <div id="notificationPanel" class="notification-panel hidden">
+      <div class="notification-panel-header">
+        <h3 data-i18n="notifications">الإشعارات</h3>
+        <button id="closeNotificationPanel" class="close-panel-btn">✕</button>
+      </div>
+      <div id="notificationList" class="notification-list">
+        <!-- Notifications will be dynamically loaded here -->
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- HOME PAGE -->
+      <section id="homePage" class="page-content active">
+        <!-- Hero Banner -->
+        <div class="hero-banner">
+          <div class="hero-overlay"></div>
+          <div class="hero-content">
+            <h1 class="hero-title" data-i18n="hero_title">اكتشف المواهب الرياضية حول العالم</h1>
+            <p class="hero-subtitle" data-i18n="hero_subtitle">انضم لأكبر منصة لربط اللاعبين والمدربين والأكاديميات</p>
+            <button class="hero-cta-btn" data-i18n="get_started">ابدأ الآن</button>
+          </div>
+        </div>
+
+        <!-- Spotlight Talents -->
+        <div class="section-container">
+          <h2 class="section-title" data-i18n="spotlight_talents">⭐ مواهب في دائرة الضوء</h2>
+          <div id="spotlightTalents" class="talents-grid">
+            <!-- Dynamic content -->
+          </div>
+        </div>
+
+        <!-- Latest News -->
+        <div class="section-container">
+          <h2 class="section-title" data-i18n="latest_news">📰 آخر الأخبار</h2>
+          <div id="latestNews" class="news-grid">
+            <!-- Dynamic content -->
+          </div>
+        </div>
+      </section>
+
+      <!-- DISCOVER PAGE -->
+      <section id="discoverPage" class="page-content">
+        <h2 class="page-title" data-i18n="discover">🔍 اكتشف</h2>
+        
+        <!-- Search & Filters -->
+        <div class="search-filter-container">
+          <div class="search-box">
+            <input type="text" id="searchInput" class="search-input" data-i18n-placeholder="search_placeholder" placeholder="ابحث عن لاعبين، فرق، أكاديميات...">
+            <button class="search-btn">🔍</button>
+          </div>
+          
+          <div class="filter-bar">
+            <select id="filterType" class="filter-select">
+              <option value="all" data-i18n="all_types">جميع الأنواع</option>
+              <option value="player" data-i18n="players">لاعبون</option>
+              <option value="team" data-i18n="teams">فرق</option>
+              <option value="academy" data-i18n="academies">أكاديميات</option>
+              <option value="shop" data-i18n="shops">متاجر</option>
+            </select>
+            
+            <select id="filterSport" class="filter-select">
+              <option value="all" data-i18n="all_sports">جميع الرياضات</option>
+              <!-- Dynamically populated -->
+            </select>
+            
+            <select id="filterCountry" class="filter-select">
+              <option value="all" data-i18n="all_countries">جميع الدول</option>
+              <!-- Dynamically populated -->
+            </select>
+            
+            <select id="filterCity" class="filter-select">
+              <option value="all" data-i18n="all_cities">جميع المدن</option>
+              <!-- Dynamically populated -->
+            </select>
+            
+            <button id="applyFilters" class="apply-filters-btn" data-i18n="apply_filters">تطبيق</button>
+            <button id="resetFilters" class="reset-filters-btn" data-i18n="reset_filters">إعادة تعيين</button>
+          </div>
+        </div>
+
+        <!-- Results -->
+        <div id="discoverResults" class="discover-results">
+          <!-- Dynamic content -->
+        </div>
+      </section>
+
+      <!-- TALENTS PAGE -->
+      <section id="talentsPage" class="page-content">
+        <h2 class="page-title" data-i18n="talents">⚽ المواهب</h2>
+        
+        <!-- Sort Bar -->
+        <div class="sort-bar">
+          <label data-i18n="sort_by">ترتيب حسب:</label>
+          <select id="talentSort" class="sort-select">
+            <option value="recent" data-i18n="most_recent">الأحدث</option>
+            <option value="rating" data-i18n="highest_rated">الأعلى تقييماً</option>
+            <option value="name" data-i18n="name_az">الاسم (أ-ي)</option>
+            <option value="sport" data-i18n="sport">الرياضة</option>
+          </select>
+        </div>
+
+        <div id="talentsGrid" class="talents-grid">
+          <!-- Dynamic content -->
+        </div>
+      </section>
+
+      <!-- TEAMS PAGE -->
+      <section id="teamsPage" class="page-content">
+        <h2 class="page-title" data-i18n="teams">🏅 الفرق</h2>
+        <button id="addTeamBtn" class="add-btn" data-i18n="add_team">+ إضافة فريق</button>
+        <div id="teamsGrid" class="teams-grid">
+          <!-- Dynamic content -->
+        </div>
+      </section>
+
+      <!-- ACADEMIES PAGE -->
+      <section id="academiesPage" class="page-content">
+        <h2 class="page-title" data-i18n="academies">🎓 الأكاديميات</h2>
+        <button id="addAcademyBtn" class="add-btn" data-i18n="add_academy">+ إضافة أكاديمية</button>
+        <div id="academiesGrid" class="academies-grid">
+          <!-- Dynamic content -->
+        </div>
+      </section>
+
+      <!-- ADMIN DASHBOARD PAGE -->
+      <section id="dashboardPage" class="page-content">
+        <h2 class="page-title" data-i18n="admin_dashboard">📊 لوحة التحكم الإدارية</h2>
+        
+        <!-- Stats Cards -->
+        <div class="dashboard-stats">
+          <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-info">
+              <h3 id="totalPlayers">0</h3>
+              <p data-i18n="total_players">إجمالي اللاعبين</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🏅</div>
+            <div class="stat-info">
+              <h3 id="totalTeams">0</h3>
+              <p data-i18n="total_teams">إجمالي الفرق</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🎓</div>
+            <div class="stat-info">
+              <h3 id="totalAcademies">0</h3>
+              <p data-i18n="total_academies">إجمالي الأكاديميات</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🛒</div>
+            <div class="stat-info">
+              <h3 id="totalShops">0</h3>
+              <p data-i18n="total_shops">إجمالي المتاجر</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Analytics Charts -->
+        <div class="dashboard-charts">
+          <div class="chart-container">
+            <h3 data-i18n="players_by_sport">اللاعبون حسب الرياضة</h3>
+            <canvas id="sportChart"></canvas>
+          </div>
+          <div class="chart-container">
+            <h3 data-i18n="entities_by_country">الكيانات حسب الدولة</h3>
+            <canvas id="countryChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Management Tables -->
+        <div class="dashboard-tables">
+          <div class="table-section">
+            <h3 data-i18n="manage_players">إدارة اللاعبين</h3>
+            <div id="playersTable" class="data-table">
+              <!-- Dynamic table -->
+            </div>
+          </div>
+          <div class="table-section">
+            <h3 data-i18n="manage_teams">إدارة الفرق</h3>
+            <div id="teamsTable" class="data-table">
+              <!-- Dynamic table -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MARKETPLACE PAGE -->
+      <section id="marketplacePage" class="page-content">
+        <h2 class="page-title" data-i18n="marketplace">🛒 السوق</h2>
+        
+        <!-- Marketplace Tabs -->
+        <div class="marketplace-tabs">
+          <button class="marketplace-tab active" data-tab="pi-stores" data-i18n="pi_stores">متاجر Pi</button>
+          <button class="marketplace-tab" data-tab="team-tokens" data-i18n="team_tokens">رموز الفرق</button>
+          <button class="marketplace-tab" data-tab="nft-players" data-i18n="nft_players">لاعبو NFT</button>
+        </div>
+
+        <!-- Marketplace Content -->
+        <div id="piStoresContent" class="marketplace-content active">
+          <div id="piStoresGrid" class="marketplace-grid">
+            <!-- Dynamic content -->
+          </div>
+        </div>
+        <div id="teamTokensContent" class="marketplace-content">
+          <div id="teamTokensGrid" class="marketplace-grid">
+            <!-- Dynamic content -->
+          </div>
+        </div>
+        <div id="nftPlayersContent" class="marketplace-content">
+          <div id="nftPlayersGrid" class="marketplace-grid">
+            <!-- Dynamic content -->
+          </div>
+        </div>
+      </section>
+
+      <!-- MAP PAGE -->
+      <section id="mapPage" class="page-content">
+        <h2 class="page-title" data-i18n="interactive_map">🗺️ الخريطة التفاعلية</h2>
+        
+        <!-- Map Filters -->
+        <div class="map-filters">
+          <label>
+            <input type="checkbox" id="showTeams" checked> <span data-i18n="show_teams">عرض الفرق</span>
+          </label>
+          <label>
+            <input type="checkbox" id="showAcademies" checked> <span data-i18n="show_academies">عرض الأكاديميات</span>
+          </label>
+          <label>
+            <input type="checkbox" id="showShops" checked> <span data-i18n="show_shops">عرض المتاجر</span>
+          </label>
+          <select id="mapCityFilter" class="filter-select">
+            <option value="all" data-i18n="all_cities">جميع المدن</option>
+            <!-- Dynamic -->
+          </select>
+        </div>
+
+        <!-- Leaflet JS Container -->
+      <div id="map" style="height: 500px; width: 100%;"></div>
+
+      <!-- PROFILE PAGE -->
+      <section id="profilePage" class="page-content">
+        <div class="profile-container">
+          <!-- Profile Header -->
+          <div class="profile-header">
+            <img id="profileAvatar" src="image/avatar-placeholder.png" alt="Avatar" class="profile-avatar">
+            <div class="profile-info">
+              <h2 id="profileName" class="profile-name">اسم المستخدم</h2>
+              <p id="profileRole" class="profile-role">لاعب</p>
+              <div class="profile-stats">
+                <div class="profile-stat">
+                  <span class="stat-value" id="profileTrustScore">85</span>
+                  <span class="stat-label" data-i18n="trust_score">TrustScore</span>
+                </div>
+                <div class="profile-stat">
+                  <span class="stat-value" id="profileHighlights">12</span>
+                  <span class="stat-label" data-i18n="highlights">Highlights</span>
+                </div>
+              </div>
+            </div>
+            <button id="editProfileBtn" class="edit-profile-btn" data-i18n="edit_profile">تعديل الملف</button>
+          </div>
+
+          <!-- Profile Tabs -->
+          <div class="profile-tabs">
+            <button class="profile-tab active" data-tab="info" data-i18n="info">المعلومات</button>
+            <button class="profile-tab" data-tab="highlights" data-i18n="highlights">Highlights</button>
+            <button class="profile-tab" data-tab="messages" data-i18n="messages">الرسائل</button>
+            <button class="profile-tab" data-tab="wallet" data-i18n="wallet">المحفظة</button>
+            <button class="profile-tab" data-tab="settings" data-i18n="settings">الإعدادات</button>
+          </div>
+
+          <!-- Tab Content -->
+          <div id="infoTab" class="tab-content active">
+            <div id="profileDetails" class="profile-details">
+              <!-- Dynamic content -->
+            </div>
+          </div>
+          
+          <div id="highlightsTab" class="tab-content">
+            <button id="addHighlightBtn" class="add-btn" data-i18n="add_highlight">+ إضافة Highlight</button>
+            <div id="highlightsList" class="highlights-list">
+              <!-- Dynamic content -->
+            </div>
+          </div>
+
+          <div id="messagesTab" class="tab-content">
+            <div class="messages-container">
+              <div class="conversations-list">
+                <h3 data-i18n="conversations">المحادثات</h3>
+                <div id="conversationsList">
+                  <!-- Dynamic conversations -->
+                </div>
+              </div>
+              <div class="message-view">
+                <div id="messageHeader" class="message-header hidden">
+                  <img id="messageRecipientAvatar" src="image/avatar-placeholder.png" alt="Avatar" class="message-avatar">
+                  <span id="messageRecipientName">اسم المستخدم</span>
+                </div>
+                <div id="messageThread" class="message-thread">
+                  <p class="no-conversation" data-i18n="select_conversation">اختر محادثة لعرض الرسائل</p>
+                </div>
+                <div id="messageInput" class="message-input-container hidden">
+                  <input type="text" id="messageText" class="message-input" data-i18n-placeholder="type_message" placeholder="اكتب رسالتك...">
+                  <button id="sendMessageBtn" class="send-message-btn">📤</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="walletTab" class="tab-content">
+            <div class="wallet-container">
+              <div class="wallet-balance">
+                <h3 data-i18n="pi_balance">رصيد Pi</h3>
+                <div class="balance-amount" id="walletBalance">0.00 π</div>
+              </div>
+              <button id="linkPiWalletBtn" class="link-wallet-btn" data-i18n="link_pi_wallet">ربط محفظة Pi</button>
+              <div class="wallet-transactions">
+                <h3 data-i18n="recent_transactions">المعاملات الأخيرة</h3>
+                <div id="transactionsList" class="transactions-list">
+                  <!-- Dynamic transactions -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="settingsTab" class="tab-content">
+            <div class="settings-container">
+              <h3 data-i18n="account_settings">إعدادات الحساب</h3>
+              
+              <div class="setting-item">
+                <label data-i18n="dark_mode">الوضع الليلي</label>
+                <label class="switch">
+                  <input type="checkbox" id="darkModeSetting">
+                  <span class="slider round"></span>
+                </label>
+              </div>
+              
+              <div class="setting-item">
+                <label data-i18n="notifications_enabled">تفعيل الإشعارات</label>
+                <label class="switch">
+                  <input type="checkbox" id="notificationsSetting" checked>
+                  <span class="slider round"></span>
+                </label>
+              </div>
+
+              <div class="setting-item">
+                <label data-i18n="language">اللغة</label>
+                <select id="languageSetting" class="setting-select">
+                  <option value="ar">العربية</option>
+                  <option value="en">English</option>
+                  <option value="fr">Français</option>
+                  <option value="es">Español</option>
+                </select>
+              </div>
+
+              <button id="logoutBtn" class="logout-btn" data-i18n="logout">تسجيل الخروج</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <button class="nav-btn active" data-page="home">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label" data-i18n="home">الرئيسية</span>
+      </button>
+      <button class="nav-btn" data-page="discover">
+        <span class="nav-icon">🔍</span>
+        <span class="nav-label" data-i18n="discover">اكتشف</span>
+      </button>
+      <button class="nav-btn" data-page="talents">
+        <span class="nav-icon">⚽</span>
+        <span class="nav-label" data-i18n="talents">المواهب</span>
+      </button>
+      <button class="nav-btn" data-page="teams">
+        <span class="nav-icon">🏅</span>
+        <span class="nav-label" data-i18n="teams">الفرق</span>
+      </button>
+      <button class="nav-btn" data-page="academies">
+        <span class="nav-icon">🎓</span>
+        <span class="nav-label" data-i18n="academies">الأكاديميات</span>
+      </button>
+      <button class="nav-btn" data-page="dashboard">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label" data-i18n="dashboard">لوحة التحكم</span>
+      </button>
+      <button class="nav-btn" data-page="marketplace">
+        <span class="nav-icon">🛒</span>
+        <span class="nav-label" data-i18n="marketplace">السوق</span>
+      </button>
+      <button class="nav-btn" data-page="map">
+        <span class="nav-icon">🗺️</span>
+        <span class="nav-label" data-i18n="map">الخريطة</span>
+      </button>
+      <button class="nav-btn" data-page="profile">
+        <span class="nav-icon">👤</span>
+        <span class="nav-label" data-i18n="profile">الملف</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- MODALS -->
+  
+  <!-- Player Form Modal -->
+  <div id="playerFormModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 data-i18n="add_player">إضافة لاعب</h2>
+        <button class="close-modal-btn">✕</button>
+      </div>
+      <form id="playerForm" class="entity-form">
+        <input type="text" name="name" data-i18n-placeholder="player_name" placeholder="اسم اللاعب" required>
+        <input type="number" name="age" data-i18n-placeholder="age" placeholder="العمر" required>
+        <select name="sport" required>
+          <option value="" disabled selected data-i18n="select_sport">اختر الرياضة</option>
+          <!-- Dynamic sports -->
+        </select>
+        <input type="text" name="position" data-i18n-placeholder="position" placeholder="المركز">
+        <select name="team">
+          <option value="" data-i18n="select_team">اختر الفريق (اختياري)</option>
+          <!-- Dynamic teams -->
+        </select>
+        <select name="academy">
+          <option value="" data-i18n="select_academy">اختر الأكاديمية (اختياري)</option>
+          <!-- Dynamic academies -->
+        </select>
+        <input type="text" name="city" data-i18n-placeholder="city" placeholder="المدينة" required>
+        <input type="text" name="country" data-i18n-placeholder="country" placeholder="الدولة" required>
+        <textarea name="bio" data-i18n-placeholder="bio" placeholder="نبذة عن اللاعب"></textarea>
+        <input type="file" name="photo" accept="image/*">
+        <button type="submit" class="submit-btn" data-i18n="save">حفظ</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Team Form Modal -->
+  <div id="teamFormModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 data-i18n="add_team">إضافة فريق</h2>
+        <button class="close-modal-btn">✕</button>
+      </div>
+      <form id="teamForm" class="entity-form">
+        <input type="text" name="name" data-i18n-placeholder="team_name" placeholder="اسم الفريق" required>
+        <select name="sport" required>
+          <option value="" disabled selected data-i18n="select_sport">اختر الرياضة</option>
+          <!-- Dynamic sports -->
+        </select>
+        <input type="text" name="city" data-i18n-placeholder="city" placeholder="المدينة" required>
+        <input type="text" name="country" data-i18n-placeholder="country" placeholder="الدولة" required>
+        <input type="text" name="coach" data-i18n-placeholder="coach_name" placeholder="اسم المدرب">
+        <input type="text" name="contact" data-i18n-placeholder="contact" placeholder="جهة الاتصال">
+        <textarea name="description" data-i18n-placeholder="description" placeholder="وصف الفريق"></textarea>
+        <input type="file" name="logo" accept="image/*">
+        <button type="submit" class="submit-btn" data-i18n="save">حفظ</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Academy Form Modal -->
+  <div id="academyFormModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 data-i18n="add_academy">إضافة أكاديمية</h2>
+        <button class="close-modal-btn">✕</button>
+      </div>
+      <form id="academyForm" class="entity-form">
+        <input type="text" name="name" data-i18n-placeholder="academy_name" placeholder="اسم الأكاديمية" required>
+        <select name="sport" required>
+          <option value="" disabled selected data-i18n="select_sport">اختر الرياضة</option>
+          <!-- Dynamic sports -->
+        </select>
+        <input type="text" name="city" data-i18n-placeholder="city" placeholder="المدينة" required>
+        <input type="text" name="country" data-i18n-placeholder="country" placeholder="الدولة" required>
+        <input type="text" name="director" data-i18n-placeholder="director_name" placeholder="اسم المدير">
+        <input type="text" name="contact" data-i18n-placeholder="contact" placeholder="جهة الاتصال">
+        <input type="number" name="lat" step="any" data-i18n-placeholder="latitude" placeholder="خط العرض">
+        <input type="number" name="lng" step="any" data-i18n-placeholder="longitude" placeholder="خط الطول">
+        <textarea name="description" data-i18n-placeholder="description" placeholder="وصف الأكاديمية"></textarea>
+        <input type="file" name="logo" accept="image/*">
+        <button type="submit" class="submit-btn" data-i18n="save">حفظ</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Shop Form Modal -->
+  <div id="shopFormModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 data-i18n="add_shop">إضافة متجر</h2>
+        <button class="close-modal-btn">✕</button>
+      </div>
+      <form id="shopForm" class="entity-form">
+        <input type="text" name="name" data-i18n-placeholder="shop_name" placeholder="اسم المتجر" required>
+        <select name="category" required>
+          <option value="" disabled selected data-i18n="select_category">اختر الفئة</option>
+          <option value="equipment">معدات رياضية</option>
+          <option value="apparel">ملابس رياضية</option>
+          <option value="nutrition">تغذية رياضية</option>
+          <option value="accessories">إكسسوارات</option>
+          <option value="services">خدمات</option>
+        </select>
+        <input type="text" name="city" data-i18n-placeholder="city" placeholder="المدينة" required>
+        <input type="text" name="country" data-i18n-placeholder="country" placeholder="الدولة" required>
+        <input type="text" name="owner" data-i18n-placeholder="owner_name" placeholder="اسم المالك">
+        <input type="text" name="contact" data-i18n-placeholder="contact" placeholder="جهة الاتصال">
+        <input type="number" name="lat" step="any" data-i18n-placeholder="latitude" placeholder="خط العرض">
+        <input type="number" name="lng" step="any" data-i18n-placeholder="longitude" placeholder="خط الطول">
+        <textarea name="description" data-i18n-placeholder="description" placeholder="وصف المتجر"></textarea>
+        <input type="file" name="logo" accept="image/*">
+        <button type="submit" class="submit-btn" data-i18n="save">حفظ</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Highlight Form Modal -->
+  <div id="highlightFormModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 data-i18n="add_highlight">إضافة Highlight</h2>
+        <button class="close-modal-btn">✕</button>
+      </div>
+      <form id="highlightForm" class="entity-form">
+        <input type="text" name="title" data-i18n-placeholder="highlight_title" placeholder="عنوان الـ Highlight" required>
+        <input type="url" name="videoUrl" data-i18n-placeholder="video_url" placeholder="رابط الفيديو (YouTube, Vimeo...)" required>
+        <textarea name="description" data-i18n-placeholder="description" placeholder="وصف الـ Highlight"></textarea>
+        <button type="submit" class="submit-btn" data-i18n="save">حفظ</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Message Payment Modal -->
+  <div id="messagePaymentModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 data-i18n="first_message_payment">دفع الرسالة الأولى</h2>
+        <button class="close-modal-btn">✕</button>
+      </div>
+      <div class="payment-info">
+        <p data-i18n="first_message_info">لإرسال أول رسالة، يجب دفع 0.5π</p>
+        <div class="payment-amount">0.5 π</div>
+        <button id="confirmPaymentBtn" class="confirm-payment-btn" data-i18n="confirm_payment">تأكيد الدفع</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rating Modal -->
+  <div id="ratingModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 data-i18n="rate_entity">تقييم</h2>
+        <button class="close-modal-btn">✕</button>
+      </div>
+      <div class="rating-content">
+        <p id="ratingEntityName"></p>
+        <div class="star-rating">
+          <span class="star" data-value="1">★</span>
+          <span class="star" data-value="2">★</span>
+          <span class="star" data-value="3">★</span>
+          <span class="star" data-value="4">★</span>
+          <span class="star" data-value="5">★</span>
+        </div>
+        <textarea id="ratingComment" data-i18n-placeholder="rating_comment" placeholder="أضف تعليقك (اختياري)"></textarea>
+        <button id="submitRatingBtn" class="submit-btn" data-i18n="submit_rating">إرسال التقييم</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div id="loadingSpinner" class="loading-spinner hidden">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
